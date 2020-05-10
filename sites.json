@@ -79,7 +79,7 @@
     "label_name": "run-ccu.user_password_reset_token.v1.topic_working",
     "source": "ccu",
     "source_topic": "20200205",
-    "value": 90,
+    "value": 1870,
     "version": "v1",
     "zone": "working"
   }

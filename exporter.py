@@ -12,13 +12,17 @@ FILE_PATH = os.path.join(APP_PATH, os.path.join('sites.json'))
 
 class GaugeExporterCollector(object):
     def __init__(self):
-        self.gauge = Gauge('kafka_consumer_group_offset', 'Help text', ['dataset', 'source', 'zone', 'version'])
+        self.gauges = {
+            'Offset': Gauge('kafka_consumer_group_offset', 'Help consumer offset',
+                            ['dataset', 'source', 'zone', 'version']),
+            'Lag': Gauge('kafka_consumer_group_lag', 'Help consumer lag', ['dataset', 'source', 'zone', 'version']),
+        }
 
     def collect(self):
-        exporter_data = {
-            'Offset': [],
-            'Lag': []
-        }
+        exporter_data = {}
+
+        for gauge_key in self.gauges:
+            exporter_data[gauge_key] = []
 
         topics = load_json_file(FILE_PATH)
         for topic in topics:
@@ -30,9 +34,10 @@ class GaugeExporterCollector(object):
                 'value': float(topic['value']),
             })
 
-        for offset in exporter_data['Offset']:
-            self.gauge.labels(offset['dataset'], offset['source'], offset['zone'], offset['version']).set(
-                offset['value'])
+        for metric_key in exporter_data:
+            for data in exporter_data[metric_key]:
+                self.gauges[metric_key].labels(data['dataset'], data['source'], data['zone'], data['version']).set(
+                    data['value'])
 
 
 def load_json_file(filename):
